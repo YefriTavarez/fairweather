@@ -1,0 +1,18 @@
+include MANIFEST.in
+include requirements.txt
+include *.json
+include *.md
+include *.py
+include *.txt
+recursive-include fairweather *.css
+recursive-include fairweather *.csv
+recursive-include fairweather *.html
+recursive-include fairweather *.ico
+recursive-include fairweather *.js
+recursive-include fairweather *.json
+recursive-include fairweather *.md
+recursive-include fairweather *.png
+recursive-include fairweather *.py
+recursive-include fairweather *.svg
+recursive-include fairweather *.txt
+recursive-exclude fairweather *.pyc
