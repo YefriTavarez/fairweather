@@ -26,7 +26,11 @@ app_license = "General Public License, v3"
 # page_js = {"page" : "public/js/file.js"}
 
 # include js in doctype views
-# doctype_js = {"doctype" : "public/js/doctype.js"}
+doctype_js = {
+	"Sales Order" : "public/js/sales_order.js",
+	"Sales Invoice" : "public/js/sales_invoice.js",
+	"Delivery Note" : "public/js/delivery_note.js",
+}
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
@@ -79,13 +83,14 @@ app_license = "General Public License, v3"
 # ---------------
 # Hook on document methods and events
 
-# doc_events = {
-# 	"*": {
-# 		"on_update": "method",
-# 		"on_cancel": "method",
-# 		"on_trash": "method"
-#	}
-# }
+doc_events = {
+	"Contact": {
+		"validate": "fairweather.events.contact.validate",
+	},
+	"Sales Invoice": {
+		"validate": "fairweather.fairweather_innovations.doctype.sales_invoice.sales_invoice.validate",
+	}
+}
 
 # Scheduled Tasks
 # ---------------
@@ -120,3 +125,4 @@ app_license = "General Public License, v3"
 # 	"frappe.desk.doctype.event.event.get_events": "fairweather.event.get_events"
 # }
 
+on_session_creation = "fairweather.sessions.before_login"
