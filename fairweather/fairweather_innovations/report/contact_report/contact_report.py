@@ -21,6 +21,7 @@ def get_column(filters=None):
         "Email:Data:180",
         "Contact Role:Link/Contact Role:140",
         "Phone:Data:120",
+        "Mobile No:Data:120",
     )
 
 def get_data(filters=None):
@@ -37,7 +38,8 @@ def get_data(filters=None):
             `tabContact`.`last_name`,
             `tabContact`.`email_id`,
             `tabContact`.`contact_role`,
-            `tabContact`.`phone`
+            `tabContact`.`phone`,
+            `tabCustomer`.`mobile_no`
         From
             `tabContact`
         Inner Join
