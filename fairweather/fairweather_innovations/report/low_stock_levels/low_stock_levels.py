@@ -21,9 +21,10 @@ def get_conditions(filters):
 		("Bin", "warehouse", "=", "%(warehouse)s"),
 		("Item", "safety_stock", ">=", "`tabBin`.`actual_qty`"),
 		("Item", "item_group", "=", "%(item_group)s"),
+		# ("Item", "disabled", "=", 0),
 	)
 
-	sql_conditions = []
+	sql_conditions = list()
 
 	for doctype, fieldname, compare, value in conditions:
 		if fieldname in filters:
@@ -39,8 +40,6 @@ def get_formatted_field(label, width=100, fieldtype=None):
 	"""
 	Returns formatted string
 		[Label]:[Field Type]/[Options]:[Width]
-
-
 	"""
 	from frappe import _
 
@@ -68,7 +67,8 @@ def get_data(filters):
 			On
 				`tabBin`.item_code = `tabItem`.item_code
 		Where
-			{conditions}
+			`tabItem`.disabled = 0
+			And {conditions}
 		""".format(fields=fields, conditions=conditions or "1 = 1"),
 	filters, debug=False)
 
@@ -79,24 +79,26 @@ def get_columns(filters):
 
 	columns = (
 		("Item Code", "item_code", "Link/Item"),
-		("Item Name", "item_name", "Data"),
+		("Description", "description", "Data"),
 		("Item Group", "item_group", "Link/Item Group"),
+		("Default Supplier", "default_supplier", "Link/Supplier"),
 		("Stock Uom", "stock_uom", "Link/UOM"),
 		("Actual Qty", "actual_qty", "Float"),
 		("Safety Stock", "safety_stock", "Float"),
+		("Minimum Order Qty", "min_order_qty", "Float"),
 		("Valuation Rate", "valuation_rate", "Currency"),
 		("Projected Qty", "projected_qty", "Float"),
 		("Reserved Qty For Production", "reserved_qty_for_production", "Float"),
 		("Reserved Qty", "reserved_qty", "Float"),
-		("Planned Qty", "planned_qty", "Float"),
-		("Indented Qty", "indented_qty", "Float"),
+		# ("Planned Qty", "planned_qty", "Float"),
+		# ("Indented Qty", "indented_qty", "Float"),
 		("Warehouse", "warehouse", "Link/Warehouse"),
 		("Ordered Qty", "ordered_qty", "Float"),
-		("Reserved Qty For Sub Contract", "reserved_qty_for_sub_contract", "Float"),
+		# ("Reserved Qty For Sub Contract", "reserved_qty_for_sub_contract", "Float"),
 		("Stock Value", "stock_value", "Currency"),
 	)
 
-	formatted_columns = []
+	formatted_columns = list()
 
 	for label, fieldname, fieldtype in columns:
 		formatted_column = get_formatted_field(label=label,
@@ -113,24 +115,26 @@ def get_fields(filters):
 
 	fields = (
 		("Bin", "item_code"),
-		("Item", "item_name"),
+		("Item", "description"),
 		("Item", "item_group"),
+		("Item", "default_supplier"),
 		("Bin", "stock_uom"),
 		("Bin", "actual_qty"),
 		("Item", "safety_stock"),
+		("Item", "min_order_qty"),
 		("Bin", "valuation_rate"),
 		("Bin", "projected_qty"),
 		("Bin", "reserved_qty_for_production"),
 		("Bin", "reserved_qty"),
-		("Bin", "planned_qty"),
-		("Bin", "indented_qty"),
+		# ("Bin", "planned_qty"),
+		# ("Bin", "indented_qty"),
 		("Bin", "warehouse"),
 		("Bin", "ordered_qty"),
-		("Bin", "reserved_qty_for_sub_contract"),
+		# ("Bin", "reserved_qty_for_sub_contract"),
 		("Bin", "stock_value"),
 	)
 
-	sql_fields = []
+	sql_fields = list()
 
 	for doctype, fieldname in fields:
 		sql_field = "`tab{doctype}`.`{fieldname}`" \
