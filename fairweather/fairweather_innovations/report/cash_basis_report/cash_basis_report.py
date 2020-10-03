@@ -1,212 +1,275 @@
-# Copyright (c) 2013, Yefri Tavarez and contributors
-# For license information, please see license.txt
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
+# License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 
-from frappe import db as database
-from frappe import _ as translate
-from frappe import _dict as pydict
+from frappe.utils import flt
+from frappe import msgprint, _
 
-from frappe.utils import flt, cint, cstr
+def execute(filters=None):
+    return _execute(filters)
 
-class QueryReport:
-    @classmethod
-    def run(cls, filters):
-        return cls.columns(filters), \
-            cls.data(filters)
-    
-    @classmethod
-    def columns(cls, filters):
-        columns = list()
+def _execute(filters, additional_table_columns=None, additional_query_columns=None):
+    if not filters: filters = frappe._dict({})
 
-        columns += [cls.get_docfield("Invoice Name", "Link", "Sales Invoice")]
-        columns += [cls.get_docfield("Invoice Date", "Date")]
-        columns += [cls.get_docfield("Due Date", "Date")]
-        columns += [cls.get_docfield("Payment Name", "Link", "Payment Entry")]
-        columns += [cls.get_docfield("Payment Date", "Date")]
-        columns += [cls.get_docfield("Mode of Payment", "Link", "Mode of Payment")]
-        columns += [cls.get_docfield("Customer Name", "Link", "Customer", 160)]
-        columns += [cls.get_docfield("Customer Group", "Link", "Customer Group", 120)]
-        columns += [cls.get_docfield("Currency", "Link", "Currency")]
-        columns += [cls.get_docfield("Invoice Total Amount", "Currency")]
-        columns += [cls.get_docfield("Invoice Allocated Amount", "Currency")]
-        columns += [cls.get_docfield("Invoice Outstanding Amount", "Currency")]
+    invoice_list = get_invoices(filters, additional_query_columns)
+    columns, income_accounts, tax_accounts = get_columns(invoice_list, additional_table_columns)
 
-        return columns
-    
-    @classmethod
-    def data(cls, filters):
-        conditions = cls.conditions(filters)
-        
-        data = cls.result(conditions, filters)
+    if not invoice_list:
+        msgprint(_("No record found"))
+        return columns, invoice_list
 
-        for d in data:
-            pass
+    invoice_income_map = get_invoice_income_map(invoice_list)
+    invoice_income_map, invoice_tax_map = get_invoice_tax_map(invoice_list,
+        invoice_income_map, income_accounts)
+    #Cost Center & Warehouse Map
+    invoice_cc_wh_map = get_invoice_cc_wh_map(invoice_list)
+    invoice_so_dn_map = get_invoice_so_dn_map(invoice_list)
+    company_currency = frappe.db.get_value("Company", filters.get("company"), "default_currency")
+    mode_of_payments = get_mode_of_payments([inv.name for inv in invoice_list])
 
-        return cls.as_list(data)
-    
+    data = []
+    for inv in invoice_list:
+        # invoice details
+        sales_order = list(set(invoice_so_dn_map.get(inv.name, {}).get("sales_order", [])))
+        delivery_note = list(set(invoice_so_dn_map.get(inv.name, {}).get("delivery_note", [])))
+        cost_center = list(set(invoice_cc_wh_map.get(inv.name, {}).get("cost_center", [])))
+        warehouse = list(set(invoice_cc_wh_map.get(inv.name, {}).get("warehouse", [])))
 
-    @classmethod
-    def conditions(cls, filters):
-        conditions = list()
-        
-                
-        if True: # always conditions
-            conditions += ["payment.payment_type = \"Receive\""]
+        row = [
+            inv.name, inv.posting_date, inv.customer, inv.customer_name
+        ]
 
-        if True: # always conditions
-            conditions += ["payment.party_type = \"Customer\""]
+        if additional_query_columns:
+            for col in additional_query_columns:
+                row.append(inv.get(col))
 
-        if "company" in filters:
-            conditions += ["payment.company = %(company)s"]
-        
-        if "from_date" in filters:
-            conditions += ["payment.posting_date >= %(from_date)s"]
+        row +=[
+            inv.get("customer_group"),
+            inv.get("territory"),
+            inv.get("tax_id"),
+            inv.debit_to, ", ".join(mode_of_payments.get(inv.name, [])),
+            inv.project, inv.owner, inv.remarks,
+            ", ".join(sales_order), ", ".join(delivery_note),", ".join(cost_center),
+            ", ".join(warehouse), company_currency
+        ]
+        # map income values
+        base_net_total = 0
+        for income_acc in income_accounts:
+            income_amount = flt(invoice_income_map.get(inv.name, {}).get(income_acc))
+            base_net_total += income_amount
+            row.append(income_amount)
 
-        if "to_date" in filters:
-            conditions += ["payment.posting_date <= %(to_date)s"]
-        
-        if "customer_group" in filters:
-            conditions += ["""payment.party in (
-                Select
-                    customer.name
-                From
-                    `tabCustomer` As customer
-                Where
-                    customer.customer_group = %(customer_group)s)
-            """]
+        # net total
+        row.append(base_net_total or inv.base_net_total)
 
-        return " And ".join(conditions)
-    
-    @classmethod
-    def result(cls, conditions, values):
-        query = """
+        # tax account
+        total_tax = 0
+        for tax_acc in tax_accounts:
+            if tax_acc not in income_accounts:
+                tax_amount = flt(invoice_tax_map.get(inv.name, {}).get(tax_acc))
+                total_tax += tax_amount
+                row.append(tax_amount)
+
+        # total tax, grand total, outstanding amount & rounded total
+        row += [total_tax, inv.base_grand_total, inv.base_rounded_total, inv.outstanding_amount]
+
+        data.append(row)
+
+    return columns, data
+
+def get_columns(invoice_list, additional_table_columns):
+    """return columns based on filters"""
+    columns = [
+        _("Invoice") + ":Link/Sales Invoice:120", _("Posting Date") + ":Date:80",
+        _("Customer") + ":Link/Customer:120", _("Customer Name") + "::120"
+    ]
+
+    if additional_table_columns:
+        columns += additional_table_columns
+
+    columns +=[
+        _("Customer Group") + ":Link/Customer Group:120", _("Territory") + ":Link/Territory:80",
+        _("Tax Id") + "::80", _("Receivable Account") + ":Link/Account:120", _("Mode of Payment") + "::120",
+        _("Project") +":Link/Project:80", _("Owner") + "::150", _("Remarks") + "::150",
+        _("Sales Order") + ":Link/Sales Order:100", _("Delivery Note") + ":Link/Delivery Note:100",
+        _("Cost Center") + ":Link/Cost Center:100", _("Warehouse") + ":Link/Warehouse:100",
+        {
+            "fieldname": "currency",
+            "label": _("Currency"),
+            "fieldtype": "Data",
+            "width": 80
+        }
+    ]
+
+    income_accounts = tax_accounts = income_columns = tax_columns = []
+
+    if invoice_list:
+        income_accounts = frappe.db.sql_list("""select distinct income_account
+            from `tabSales Invoice Item` where docstatus = 1 and parent in (%s)
+            order by income_account""" %
+            ', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]))
+
+        tax_accounts = 	frappe.db.sql_list("""select distinct description
+            from `tabSales Taxes and Charges` where parenttype = 'Sales Invoice'
+            and docstatus = 1 and base_tax_amount_after_discount_amount != 0
+            and parent in (%s) order by description""" %
+            ', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]))
+
+    income_columns = [(account + ":Currency/currency:120") for account in income_accounts]
+    for account in tax_accounts:
+        if account not in income_accounts:
+            tax_columns.append(account + ":Currency/currency:120")
+
+    columns = columns + income_columns + [_("Net Total") + ":Currency/currency:120"] + tax_columns + \
+        [_("Total Tax") + ":Currency/currency:120", _("Grand Total") + ":Currency/currency:120",
+        _("Rounded Total") + ":Currency/currency:120", _("Outstanding Amount") + ":Currency/currency:120"]
+
+    return columns, income_accounts, tax_accounts
+
+def get_conditions(filters):
+    conditions = ""
+
+    if filters.get("company"): conditions += " and company=%(company)s"
+    if filters.get("customer"): conditions += " and customer = %(customer)s"
+
+    # if filters.get("from_date"): conditions += " and posting_date >= %(from_date)s"
+    # if filters.get("to_date"): conditions += " and posting_date <= %(to_date)s"
+
+    conditions += """
+        and name in (
             Select
-                (
-                    reference.reference_name
-                ) As invoice_name,
-                (
-                    Select
-                        invoice.posting_date
-                    From
-                        `tabSales Invoice` As invoice
-                    Where
-                        invoice.name = reference.reference_name
-                ) As invoice_date,
-                (
-                    Select
-                        invoice.due_date
-                    From
-                        `tabSales Invoice` As invoice
-                    Where
-                        invoice.name = reference.reference_name
-                ) As due_date,
-                (
-                    payment.name
-                ) As payment_name,
-                (
-                    payment.posting_date
-                ) As payment_date,
-                (
-                    payment.mode_of_payment
-                ) As mode_of_payment,
-                (
-                    payment.party
-                ) As customer_name,
-                (
-                    Select
-                        customer.customer_group
-                    From
-                        `tabCustomer` As customer
-                    Where
-                        customer.name = payment.party
-                ) As customer_group,
-                (
-                    Select
-                        invoice.currency
-                    From
-                        `tabSales Invoice` As invoice
-                    Where
-                        invoice.name = reference.reference_name
-                ) As invoice_currency,
-                (
-                    reference.total_amount
-                ) As invoice_total_amount,
-                (
-                    reference.allocated_amount
-                ) As invoice_allocated_amount,
-                (
-                    Select
-                        invoice.outstanding_amount
-                    From
-                        `tabSales Invoice` As invoice
-                    Where
-                        invoice.name = reference.reference_name
-                ) As invoice_outstanding_amount
+                child.reference_name
             From
-                `tabPayment Entry` payment
+                `tabPayment Entry` parent
             Inner Join
-                `tabPayment Entry Reference` reference
+                `tabPayment Entry Reference` child
                 On
-                    reference.parent = payment.name
-                    And reference.parenttype = "Payment Entry"
-                    And reference.parentfield = "references"
+                    child.parent = parent.name
+                    And child.docstatus = parent.docstatus
+                    And child.parenttype = "Payment Entry"
+                    And child.parentfield = "references"
             Where
-                {conditions}
-            Order By
-                payment.posting_date Asc,
-                reference.reference_name Asc
-        """.format(conditions=conditions)
-
-
-        return database.sql(query, values, as_dict=True)
-    
-    @classmethod
-    def as_list(cls, values):
-        array = list()
-
-        for d in values:
-            array.append(cls.to_list(d))
-        
-        return array
-
-    @classmethod
-    def to_list(cls, values):
-        array = list()
-        listorder = cls.fieldlist()
-
-        for d in listorder:
-            array.append(values[d])
-        
-        return array
-
-    @staticmethod
-    def fieldlist():
-        return (
-            "invoice_name",
-            "invoice_date",
-            "due_date",
-            "payment_name",
-            "payment_date",
-            "mode_of_payment",
-            "customer_name",
-            "customer_group",
-            "invoice_currency",
-            "invoice_total_amount",
-            "invoice_allocated_amount",
-            "invoice_outstanding_amount",
+                parent.posting_date between %(from_date)s and %(to_date)s
+                And parent.docstatus = 1
         )
+    """
 
-    @staticmethod
-    def get_docfield(label, fieldtype="Data", options="", width=100):
-        return "{label}:{fieldtype}/{options}:{width}" \
-            .format(label=label, fieldtype=fieldtype, 
-                    options=options, width=width)
+    if filters.get("owner"): conditions += " and owner = %(owner)s"
 
-    
+    if filters.get("mode_of_payment"):
+        conditions += """ and exists(select name from `tabSales Invoice Payment`
+             where parent=`tabSales Invoice`.name
+                 and ifnull(`tabSales Invoice Payment`.mode_of_payment, '') = %(mode_of_payment)s)"""
 
+    if filters.get("cost_center"):
+        conditions +=  """ and exists(select name from `tabSales Invoice Item`
+             where parent=`tabSales Invoice`.name
+                 and ifnull(`tabSales Invoice Item`.cost_center, '') = %(cost_center)s)"""
 
-def execute(filters):
-    return QueryReport \
-        .run(filters)
+    if filters.get("warehouse"):
+        conditions +=  """ and exists(select name from `tabSales Invoice Item`
+             where parent=`tabSales Invoice`.name
+                 and ifnull(`tabSales Invoice Item`.warehouse, '') = %(warehouse)s)"""
+
+    return conditions
+
+def get_invoices(filters, additional_query_columns):
+    if additional_query_columns:
+        additional_query_columns = ', ' + ', '.join(additional_query_columns)
+
+    conditions = get_conditions(filters)
+    return frappe.db.sql("""
+        select name, posting_date, debit_to, project, customer, 
+        customer_name, owner, remarks, territory, tax_id, customer_group,
+        base_net_total, base_grand_total, base_rounded_total, outstanding_amount {0}
+        from `tabSales Invoice`
+        where docstatus = 1 %s order by posting_date desc, name desc""".format(additional_query_columns or '') %
+        conditions, filters, as_dict=1)
+
+def get_invoice_income_map(invoice_list):
+    income_details = frappe.db.sql("""select parent, income_account, sum(base_net_amount) as amount
+        from `tabSales Invoice Item` where parent in (%s) group by parent, income_account""" %
+        ', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]), as_dict=1)
+
+    invoice_income_map = {}
+    for d in income_details:
+        invoice_income_map.setdefault(d.parent, frappe._dict()).setdefault(d.income_account, [])
+        invoice_income_map[d.parent][d.income_account] = flt(d.amount)
+
+    return invoice_income_map
+
+def get_invoice_tax_map(invoice_list, invoice_income_map, income_accounts):
+    tax_details = frappe.db.sql("""select parent, description,
+        sum(base_tax_amount_after_discount_amount) as tax_amount
+        from `tabSales Taxes and Charges` where parent in (%s) group by parent, description""" %
+        ', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]), as_dict=1)
+
+    invoice_tax_map = {}
+    for d in tax_details:
+        if d.description in income_accounts:
+            if invoice_income_map[d.parent].has_key(d.description):
+                invoice_income_map[d.parent][d.description] += flt(d.tax_amount)
+            else:
+                invoice_income_map[d.parent][d.description] = flt(d.tax_amount)
+        else:
+            invoice_tax_map.setdefault(d.parent, frappe._dict()).setdefault(d.description, [])
+            invoice_tax_map[d.parent][d.description] = flt(d.tax_amount)
+
+    return invoice_income_map, invoice_tax_map
+
+def get_invoice_so_dn_map(invoice_list):
+    si_items = frappe.db.sql("""select parent, sales_order, delivery_note, so_detail
+        from `tabSales Invoice Item` where parent in (%s)
+        and (ifnull(sales_order, '') != '' or ifnull(delivery_note, '') != '')""" %
+        ', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]), as_dict=1)
+
+    invoice_so_dn_map = {}
+    for d in si_items:
+        if d.sales_order:
+            invoice_so_dn_map.setdefault(d.parent, frappe._dict()).setdefault(
+                "sales_order", []).append(d.sales_order)
+
+        delivery_note_list = None
+        if d.delivery_note:
+            delivery_note_list = [d.delivery_note]
+        elif d.sales_order:
+            delivery_note_list = frappe.db.sql_list("""select distinct parent from `tabDelivery Note Item`
+                where docstatus=1 and so_detail=%s""", d.so_detail)
+
+        if delivery_note_list:
+            invoice_so_dn_map.setdefault(d.parent, frappe._dict()).setdefault("delivery_note", delivery_note_list)
+
+    return invoice_so_dn_map
+
+def get_invoice_cc_wh_map(invoice_list):
+    si_items = frappe.db.sql("""select parent, cost_center, warehouse
+        from `tabSales Invoice Item` where parent in (%s)
+        and (ifnull(cost_center, '') != '' or ifnull(warehouse, '') != '')""" %
+        ', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]), as_dict=1)
+
+    invoice_cc_wh_map = {}
+    for d in si_items:
+        if d.cost_center:
+            invoice_cc_wh_map.setdefault(d.parent, frappe._dict()).setdefault(
+                "cost_center", []).append(d.cost_center)
+
+        if d.warehouse:
+            invoice_cc_wh_map.setdefault(d.parent, frappe._dict()).setdefault(
+                "warehouse", []).append(d.warehouse)
+
+    return invoice_cc_wh_map
+
+def get_mode_of_payments(invoice_list):
+    mode_of_payments = {}
+    if invoice_list:
+        inv_mop = frappe.db.sql("""select parent, mode_of_payment
+            from `tabSales Invoice Payment` where parent in (%s) group by parent, mode_of_payment""" %
+            ', '.join(['%s']*len(invoice_list)), tuple(invoice_list), as_dict=1)
+
+        for d in inv_mop:
+            mode_of_payments.setdefault(d.parent, []).append(d.mode_of_payment)
+
+    return mode_of_payments
