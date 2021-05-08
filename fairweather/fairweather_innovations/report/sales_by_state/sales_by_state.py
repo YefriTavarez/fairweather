@@ -4,6 +4,7 @@
 
 from __future__ import unicode_literals
 import frappe
+import fairweather
 
 from frappe import db as database
 from frappe import _ as translate
@@ -82,12 +83,13 @@ class SalesByState:
     @classmethod
     def get_result_set(cls, filters, conditions):
         query = cls.get_query(conditions)
+        cls.include_item_group_in_filters(filters)
 
         return database.sql(query, filters, as_dict=True)
 
     @classmethod
     def get_dynamic_cols(cls, filters):
-        conditions = cls.get_conditions(filters)
+        conditions = cls.get_conditions(filters, ignore_item_groups=True)
 
         query = """
             Select
@@ -97,16 +99,23 @@ class SalesByState:
             From
                 `tabSales Taxes and Charges`,
                 `tabSales Invoice`,
+                `tabSales Invoice Item`,
                 `tabAddress`
             Where
-                 `tabSales Taxes and Charges`.`parenttype` = "Sales Invoice"
-                And  `tabSales Taxes and Charges`.`parentfield` = "taxes"
+                `tabSales Taxes and Charges`.`parenttype` = "Sales Invoice"
+                And `tabSales Taxes and Charges`.`parentfield` = "taxes"
+                And `tabSales Taxes and Charges`.`parent` = `tabSales Invoice`.`name`
                 And {conditions}
         """.format(conditions=conditions)
 
-        frappe.errprint(query)
-
         return database.sql_list(query, filters)
+
+    @classmethod
+    def include_item_group_in_filters(cls, filters):
+        filters.update({
+            "item_groups": fairweather.get_sales_by_state_items_groups(),
+        })
+        
 
     @classmethod
     def get_query(cls, conditions):
@@ -127,16 +136,28 @@ class SalesByState:
                 `tabSales Invoice`.`grand_total`,
                 `tabSales Invoice`.`outstanding_amount`
             From
-                `tabSales Invoice`, `tabAddress`                        
+                `tabSales Invoice`,
+                `tabSales Invoice Item`,
+                `tabAddress`                   
             Where
                 {conditions}
+                And `tabSales Invoice Item`.`parenttype` = "Sales Invoice"
+                And `tabSales Invoice Item`.`parentfield` = "items"
+                And `tabSales Invoice Item`.`parent` = `tabSales Invoice`.`name`
+            Group By
+                `tabSales Invoice`.`name`
+            Order By
+                `tabSales Invoice`.`name` Asc
         """.format(conditions=conditions)
 
     @classmethod
-    def get_conditions(cls, filters):
+    def get_conditions(cls, filters, ignore_item_groups=False):
         conditions = list()
 
         conditions += ["`tabSales Invoice`.`docstatus` = 1"]
+
+        if not ignore_item_groups:
+            conditions += ["`tabSales Invoice Item`.`item_group` in %(item_groups)s"]
 
         if "from_date" in filters:
             conditions += ["`tabSales Invoice`.`posting_date` >= %(from_date)s"]
