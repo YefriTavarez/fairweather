@@ -9,6 +9,8 @@ from frappe.model.document import Document
 from frappe.utils import flt, cint, cstr
 from frappe import get_doc, get_value, throw
 
+from . import get_journal_entry
+
 class CreditNoteMappingTool(Document):
 	def validate(self):
 		if self.flags.ignore_validations:
@@ -41,38 +43,83 @@ class CreditNoteMappingTool(Document):
 			unallocated_amount=credit_note_balance)
 
 		self.flags.can_proceed = True
-		self._apply_outstanding_amount_to_invoice(self.amount_to_apply)
+		return self._apply_outstanding_amount_to_invoice(self.amount_to_apply)
 
 	def _apply_outstanding_amount_to_invoice(self, credit_note_balance):
 		if not self.flags.can_proceed:
 			return
 
-		invoice = get_doc(self.meta.get_field("sales_invoice").options,
+		mapping_tool = self
+
+		sales_invoice = get_doc(self.meta.get_field("sales_invoice").options,
 			self.sales_invoice)
 
 		credit_note = get_doc(self.meta.get_field("credit_note").options,
 			self.credit_note)
 
+		journal_entry = get_journal_entry(credit_note, sales_invoice, mapping_tool)
 
-		invoice.outstanding_amount -= credit_note_balance
-		credit_note.outstanding_amount += credit_note_balance
+		# let's run this methods manually
+		if not journal_entry.is_opening:
+			journal_entry.is_opening='No'
 
-		if invoice.outstanding_amount < .000:
-			throw("""Ooops... Somehow the outstanding amount for invoice {invoice} is negative.
-				<br>The credit was not applied. Please contact your System Manager!"""\
-				.format(invoice=self.sales_invoice))
+		journal_entry.clearance_date = None
 
-		if flt(invoice.outstanding_amount, 3) == .000:
-			invoice.status = "Paid"
+		journal_entry.validate_party()
+		journal_entry.validate_cheque_info()
+		journal_entry.validate_entries_for_advance()
+		journal_entry.validate_multi_currency()
+		journal_entry.set_amounts_in_company_currency()
+		journal_entry.validate_total_debit_and_credit()
+		journal_entry.validate_against_jv()
+		# journal_entry.validate_reference_doc()
+		journal_entry.set_against_account()
+		journal_entry.create_remarks()
+		journal_entry.set_print_format_fields()
+		journal_entry.validate_expense_claim()
+		journal_entry.validate_credit_debit_note()
+		journal_entry.validate_empty_accounts_table()
+		journal_entry.set_account_and_party_balance()
 
-		invoice.db_update()
+		# insert
+		journal_entry.flags.ignore_validate = True
+		journal_entry.insert()
+	
+		journal_entry.check_credit_limit()
+		journal_entry.make_gl_entries()
+		journal_entry.update_advance_paid()
+		journal_entry.update_expense_claim()
+		journal_entry.update_employee_loan()
 
-		if credit_note.outstanding_amount > .000:
-			throw("""Ooops... Somehow the outstanding amount for the credit note {credit_note}
-				is positive. <br>The credit was not applied. Please contact your System Manager!"""\
-				.format(credit_note=self.sales_invoice))
+		# submit
+		journal_entry.docstatus = 1
+		for child in journal_entry.get_all_children():
+			child.docstatus = journal_entry.docstatus
+			child.db_update()
 
-		credit_note.db_update()
+		journal_entry.db_update()
+
+		return journal_entry.name
+			
+		# invoice.outstanding_amount -= credit_note_balance
+		# credit_note.outstanding_amount += credit_note_balance
+
+		# if invoice.outstanding_amount < .000:
+		# 	throw("""Ooops... Somehow the outstanding amount for invoice {invoice} is negative.
+		# 		<br>The credit was not applied. Please contact your System Manager!"""\
+		# 		.format(invoice=self.sales_invoice))
+
+		# if flt(invoice.outstanding_amount, 3) == .000:
+		# 	invoice.status = "Paid"
+
+		# invoice.db_update()
+
+		# if credit_note.outstanding_amount > .000:
+		# 	throw("""Ooops... Somehow the outstanding amount for the credit note {credit_note}
+		# 		is positive. <br>The credit was not applied. Please contact your System Manager!"""\
+		# 		.format(credit_note=self.sales_invoice))
+
+		# credit_note.db_update()
 
 		invoice.add_comment("Update", "Credit for {amount} was applied"\
 			.format(amount=abs(credit_note_balance)))

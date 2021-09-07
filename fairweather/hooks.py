@@ -27,6 +27,7 @@ app_license = "General Public License, v3"
 
 # include js in doctype views
 doctype_js = {
+	"Item" : "public/js/item.js",
 	"Sales Order" : "public/js/sales_order.js",
 	"Sales Invoice" : "public/js/sales_invoice.js",
 	"Delivery Note" : "public/js/delivery_note.js",
@@ -84,6 +85,9 @@ doctype_js = {
 # Hook on document methods and events
 
 doc_events = {
+	"Item": {
+		"after_insert": "fairweather.events.item.after_insert",
+	},
 	"Contact": {
 		"validate": "fairweather.events.contact.validate",
 	},

@@ -16,13 +16,14 @@ frappe.ui.form.on('Credit Note Mapping Tool', {
 		frm.trigger("disable_save");
 	},
 	"refresh": (frm) => {
-		$.map([
+		jQuery.map([
 			"set_queries",
-			"set_intro"
+			"set_intro",
+			"add_custom_buttons",
 		], event => frm.trigger(event));
 	},
 	"set_queries": (frm) => {
-		$.map([
+		jQuery.map([
 			"set_customer_query",
 			"set_credit_note_query",
 			"set_sales_invoice_query"
@@ -31,6 +32,11 @@ frappe.ui.form.on('Credit Note Mapping Tool', {
 	"set_intro": (frm) => {
 		frm.set_intro(`This form is used to map credit notes to invoice
 			so the customer balance can be reapplied`);
+	},
+	"add_custom_buttons": (frm) => {
+		jQuery.map([
+			"add_clear_form_custom_button",
+		], event => frm.trigger(event));
 	},
 	"set_customer_query": (frm) => {
 		frm.set_query("customer", function () {
@@ -70,7 +76,7 @@ frappe.ui.form.on('Credit Note Mapping Tool', {
 		}
 	},
 	"validate_mandatory_fields": (frm) => {
-		$.map(["customer", "credit_note", "sales_invoice"], fieldname => {
+		jQuery.map(["customer", "credit_note", "sales_invoice"], fieldname => {
 			const label = frm.fields_dict[fieldname].df.label,
 				message = `Required: ${label} is a mandatory field!`;
 
@@ -104,7 +110,25 @@ frappe.ui.form.on('Credit Note Mapping Tool', {
 	"call_apply_outstanding_amount_to_invoice": (frm) => {
 		frm.call("apply_outstanding_amount_to_invoice")
 			.then(response => {
-				frappe.show_alert({ "message": "Credit Applied", "indicator": "green" });
+				const opts = {
+					"message": "Credit Applied",
+					"indicator": "green",
+				};
+
+				const { message } = response;
+
+				if (message) {
+					// const { name } = message;
+					const name = message;
+					const infomsg = "Voucher created "
+						+ "<a href =\"/desk#Form/Journal Entry/%(name)s\">"
+						+ "<i>See Voucher</i></a> ";
+
+					if (name) {
+						frappe.msgprint(repl(infomsg, { name }));
+					}
+				}
+				frappe.show_alert(opts);
 			}, exec => {
 				frappe.show_alert({ "message": "Credit not Applied", "indicator": "red" });
 			});
@@ -115,7 +139,7 @@ frappe.ui.form.on('Credit Note Mapping Tool', {
 				() => frm.trigger("validate_mandatory_fields"),
 				() => frm.trigger("validate_credit_note_against_invoice"),
 				() => frm.trigger("call_apply_outstanding_amount_to_invoice"),
-				() => frm.trigger("clear_form")
+				// () => frm.trigger("clear_form")
 			]);
 		}, ifno = () => {
 			// frm.trigger("clear_form");
@@ -203,7 +227,7 @@ frappe.ui.form.on('Credit Note Mapping Tool', {
 				}, (fieldname, value) => frm.set_value(fieldname, value));
 			};
 
-		$.map([
+		jQuery.map([
 			"invoice_amount",
 			"invoice_outstanding_amount"
 		], fieldname => frm.set_value(fieldname, "0.000"));
@@ -226,5 +250,13 @@ frappe.ui.form.on('Credit Note Mapping Tool', {
 				() => frappe.throw("Amount to Apply cannot be greater than the Unallocated Amount")
 			]);
 		}
+	},
+	"add_clear_form_custom_button": (frm) => {
+		const label = "Clear Form";
+		const action = event => {
+			() => frm.trigger("clear_form");
+		};
+
+		frm.add_custom_button(label, action);
 	}
 });
