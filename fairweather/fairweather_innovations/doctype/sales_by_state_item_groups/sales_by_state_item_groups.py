@@ -10,7 +10,7 @@ class SalesbyStateItemGroups(Document):
 	pass
 
 def get_sales_by_state_items_groups():
-	item_group_list = frappe.get_list("Sales by State Item Groups", {
+	item_group_list = frappe.get_all("Sales by State Item Groups", {
 		"parentfield": "sales_by_state_item_groups",
 		"parenttype": "Selling Settings",
 		"parent": "Selling Settings",

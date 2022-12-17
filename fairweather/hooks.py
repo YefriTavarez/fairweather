@@ -23,7 +23,9 @@ app_license = "General Public License, v3"
 # web_include_js = "/assets/fairweather/js/fairweather.js"
 
 # include js in page
-# page_js = {"page" : "public/js/file.js"}
+page_js = {
+	"print": "public/js/pages/print.js",
+}
 
 # include js in doctype views
 doctype_js = {

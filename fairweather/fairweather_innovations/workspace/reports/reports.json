@@ -1,0 +1,159 @@
+{
+ "charts": [],
+ "content": "[{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Reports</span>\",\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Sales By State\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Sales By Item\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Local Tax Rates\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Sales Detail By Customer\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Freight Report\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Supplies In Sales Orders\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Address Report\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Cash Basis Report\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Invoiced By Customer\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Low Stock Levels\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Contact Report\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Profit\",\"col\":3}},{\"type\":\"spacer\",\"data\":{\"col\":12}},{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Fairweather Innovations</b></span>\",\"col\":12}},{\"type\":\"quick_list\",\"data\":{\"quick_list_name\":\"Returns\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Tools\",\"col\":4}}]",
+ "creation": "2022-12-11 05:24:27.672373",
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 0,
+ "icon": "milestone",
+ "idx": 0,
+ "label": "Reports",
+ "links": [
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Tools",
+   "link_count": 3,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Payment Reconciliation",
+   "link_count": 0,
+   "link_to": "Payment Reconciliation",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Credit Note Mapping Tool",
+   "link_count": 0,
+   "link_to": "Credit Note Mapping Tool",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Local Tax Rates",
+   "link_count": 0,
+   "link_to": "Local Tax Rates",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  }
+ ],
+ "modified": "2022-12-13 01:00:23.466308",
+ "modified_by": "Administrator",
+ "module": "Fairweather Innovations",
+ "name": "Reports",
+ "owner": "Administrator",
+ "parent_page": "",
+ "public": 1,
+ "quick_lists": [
+  {
+   "document_type": "Sales Invoice",
+   "label": "Returns",
+   "quick_list_filter": "{\"is_return\":[\"=\",1],\"docstatus\":[\"=\",\"1\"]}"
+  }
+ ],
+ "roles": [
+  {
+   "role": "All"
+  }
+ ],
+ "sequence_id": 7.0,
+ "shortcuts": [
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Low Stock Levels",
+   "link_to": "Low Stock Levels",
+   "type": "Report"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Cash Basis Report",
+   "link_to": "Cash Basis Report",
+   "type": "Report"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Invoiced By Customer",
+   "link_to": "Invoiced By Customer",
+   "type": "Report"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Contact Report",
+   "link_to": "Contact Report",
+   "type": "Report"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Sales By State",
+   "link_to": "Sales by State",
+   "type": "Report"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Freight Report",
+   "link_to": "Freight Report",
+   "type": "Report"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Profit",
+   "link_to": "Accounts",
+   "type": "Dashboard"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Supplies In Sales Orders",
+   "link_to": "Supplies in Sales Orders",
+   "type": "Report"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Sales Detail By Customer",
+   "link_to": "Sales Detail by Customer",
+   "type": "Report"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Address Report",
+   "link_to": "Address Report",
+   "type": "Report"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Sales By Item",
+   "link_to": "Sales by Item",
+   "type": "Report"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Local Tax Rates",
+   "link_to": "Local Tax Rates",
+   "type": "Report"
+  }
+ ],
+ "title": "Reports"
+}
