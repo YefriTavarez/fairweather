@@ -1,16 +1,9 @@
 frappe.ui.form.on("Sales Invoice", {
-	onload: frm => {
-		$.each({
-			location: "local_rate",
-			customer: "customer_type"
-		}, (link, value) => {
-			frm.add_fetch(link, value, value);
-		});
-	},
 	refresh: frm => {
-		$.map([
+		jQuery.map([
 			"customer_type",
 			"add_fetches",
+			"set_queries",
 			"add_custom_buttons",
 		], event => frm.trigger(event));
 	},
@@ -39,6 +32,19 @@ frappe.ui.form.on("Sales Invoice", {
 	add_fetches: frm => {
 		frm.add_fetch("customer", "discount_terms_template",
 			"discount_terms_template");
+	},
+	set_queries: frm => {
+		const fieldname = "avalara_tax_rate";
+		const query = _ => {
+			const { doc } = frm;
+			const filters = {
+				"state": doc.avalara_state,
+			};
+
+			return { filters };
+		};
+
+		frm.set_query(fieldname, query);
 	},
 	toggle_enabled_on_submitted_fields: frm => {
 		let enable = [
@@ -77,7 +83,7 @@ frappe.ui.form.on("Sales Invoice", {
 				new frappe.views.CommunicationComposer({
 					doc: frm.doc,
 					frm: frm,
-					subject: "Seaview "+ __(frm.meta.name) + ": " + frm.docname,
+					subject: "Seaview " + __(frm.meta.name) + ": " + frm.docname,
 					recipients: email || "",
 					attach_document_print: true,
 					message: sales_invoice_message,
@@ -86,22 +92,44 @@ frappe.ui.form.on("Sales Invoice", {
 			});
 	},
 	location: frm => {
-		frm.doc.taxes_and_charges = "State and Local Taxes - SV";
+		const { doc } = frm;
+
+		doc.taxes_and_charges = "State and Local Taxes - SV";
 		frm.trigger("taxes_and_charges")
 			.then(({ message }) => {
 				let row = frm.events.get_row_based_on_account(frm);
 
-				row.description = frm.doc.location;
-				row.rate = frm.doc.local_rate;
+				row.description = doc.location;
+				row.rate = doc.local_rate;
 
 				frm.cscript.calculate_taxes_and_totals(true);
+			});
+	},
+	avalara_tax_rate: frm => {
+		const { doc } = frm;
+
+		const method = "fairweather.api.add_taxes_if_needed";
+		const args = {
+			"doc": doc,
+		};
+
+		doc.taxes_and_charges = null;
+
+		frappe.call({ method, args })
+			.then(({ message: docs }) => {
+				if (jQuery.isPlainObject(docs)) {
+					frappe.model.sync([docs]);
+					frm.refresh_fields();
+
+					frappe.show_alert("Taxes have been updated");
+				}
 			});
 	},
 	get_row_based_on_account: frm => {
 		let row = null;
 
-		$.map(frm.doc.taxes, function(d) {
-			if (d.account_head === "2320 - Local Taxes - SV") {
+		jQuery.map(frm.doc.taxes, function (d) {
+			if (d.account_head === "2320 - Local Taxes WA - SV") {
 				row = d;
 			}
 		});
