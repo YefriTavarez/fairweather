@@ -94,8 +94,14 @@ doc_events = {
 		"validate": "fairweather.events.contact.validate",
 	},
 	"Sales Invoice": {
-		"validate": "fairweather.fairweather_innovations.doctype.sales_invoice.sales_invoice.validate",
-	}
+		"validate": "fairweather.controllers.sales_invoice.validate",
+	},
+	"Sales Order": {
+		"validate": "fairweather.controllers.sales_order.validate",
+	},
+	"Delivery Note": {
+		"validate": "fairweather.controllers.delivery_note.validate",
+	},
 }
 
 # Scheduled Tasks
