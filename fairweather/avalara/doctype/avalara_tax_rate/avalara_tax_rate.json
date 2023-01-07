@@ -1,5 +1,18 @@
 {
- "actions": [],
+ "actions": [
+  {
+   "action": "/app/sales-invoice",
+   "action_type": "Route",
+   "group": "View",
+   "label": "Sales Invoices"
+  },
+  {
+   "action": "/app/sales-invoice/new-sales-invoice-1",
+   "action_type": "Route",
+   "group": "Create",
+   "label": "Sales Invoice"
+  }
+ ],
  "autoname": "format:{zip_code}",
  "creation": "2022-12-19 18:36:33.135723",
  "default_view": "List",
@@ -13,6 +26,7 @@
   "zip_code",
   "column_break_4",
   "tax_region_name",
+  "county",
   "estimated_combined_rate",
   "section_break_7",
   "state_rate",
@@ -117,11 +131,21 @@
    "label": "Title",
    "print_hide": 1,
    "report_hide": 1
+  },
+  {
+   "fieldname": "county",
+   "fieldtype": "Data",
+   "label": "County"
   }
  ],
  "index_web_pages_for_search": 1,
- "links": [],
- "modified": "2022-12-21 20:55:51.653183",
+ "links": [
+  {
+   "link_doctype": "Sales Invoice",
+   "link_fieldname": "avalara_tax_rate"
+  }
+ ],
+ "modified": "2023-01-05 03:16:45.532327",
  "modified_by": "Administrator",
  "module": "Avalara",
  "name": "Avalara Tax Rate",

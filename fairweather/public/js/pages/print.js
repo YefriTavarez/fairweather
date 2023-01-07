@@ -1,80 +1,52 @@
-class PrintView extends frappe.ui.form.PrintView {
-	constructor(wrapper) {
-		super(wrapper);
+(function () {
+	const { prototype } = frappe.ui.form.PrintView;
+	const { make } = prototype;
 
-		this.add_custom_actions();
+	prototype.make = function () {
+		make.call(this); // run the original
+
+		// finally run my custom code
+		add_custom_actions.call(this);
 	}
 
-	add_custom_actions() {
+	const add_custom_actions = function () {
 		this.page.add_action_icon(
 			"mail",
 			() => {
-				this.show_send_email_dialog();
+				show_send_email_dialog.call(this);
 			},
 			"",
 			__("Email")
 		);
-	}
+	};
 
-	show_send_email_dialog() {
-		const { frm } = this;
-		const { doc } = frm;
+	const show_send_email_dialog = function () {
+		let { frm } = this;
 
-		this.doc = doc;
+		if (!frm.get_files) {
+			frappe.model.with_doctype(frm.doctype, _ => {
+				frappe.model.with_doc(frm.doctype, frm.docname, _ => {
+					const doc = frappe.get_doc(frm.doctype, frm.docname);
 
-		this.frm.perm = [{ email: 1 }];
-		if (!jQuery.isFunction(this.frm.get_files)) {
-			this.frm.get_files = _ => [];
+					frm = new frappe.ui.form.Form(frm.doctype, self.page, false, null);
 
-			frappe.show_alert({
-				message: `It looks like this page no longer has the Attachments.
-				If you need to send any of the attachments, please go back
-				to the document and without reloading the try to email again.
-				`,
-				indicator: "yellow",
-			});
+					frm.doctype = doc.doctype;
+					frm.docname = doc.name;
+					Object.assign(frm, { doc });
+				}).finally(_ => {
+					const attachments = {
+						get_attachments() {
+							const { attachments } = frm.get_docinfo();
+							return attachments;
+						},
+					};
+
+					Object.assign(frm, { attachments });
+					frm.email_doc();
+				});
+			})
+		} else {
+			frm.email_doc();
 		}
-
-		const inform_of_status = _ => {
-			frappe.show_alert({
-				message: `Email Sent`,
-				indicator: "green",
-			});
-		};
-
-		let about_to_send = true;
-		let sent_email = false;
-		if (!jQuery.isFunction(this.frm.reload_doc)) {
-			this.frm.reload_doc = inform_of_status;
-		} else { // if it's set, then override
-			const self = this;
-			this.frm.reload_doc = _ => {
-				if (!sent_email && about_to_send) {
-					inform_of_status();
-					sent_email = true;
-				}
-
-				self.frm.check_doctype_conflict(self.frm.docname);
-
-				if (!self.frm.doc.__islocal) {
-					frappe.model.remove_from_locals(self.frm.doctype, self.frm.docname);
-					return frappe.model.with_doc(self.frm.doctype, self.frm.docname, () => {
-						self.frm.refresh();
-					});
-				}
-			};
-		}
-
-		let message = ``;
-		new frappe.views.CommunicationComposer({
-			doc: doc,
-			frm: this.frm,
-			subject: __(doc.title) + ": " + doc.name,
-			recipients: doc.email || doc.email_id || doc.contact_email,
-			// attach_document_print: true,
-			message: message,
-		});
 	}
-};
-
-frappe.ui.form.PrintView = PrintView;
+})();

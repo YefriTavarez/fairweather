@@ -16,7 +16,7 @@ app_license = "General Public License, v3"
 
 # include js, css files in header of desk.html
 # app_include_css = "/assets/fairweather/css/fairweather.css"
-# app_include_js = "/assets/fairweather/js/fairweather.js"
+app_include_js = "/assets/js/fairweather.min.js"
 
 # include js, css files in header of web template
 # web_include_css = "/assets/fairweather/css/fairweather.css"
@@ -24,15 +24,27 @@ app_license = "General Public License, v3"
 
 # include js in page
 page_js = {
-	"print": "public/js/pages/print.js",
+    "print": [
+        "public/js/pages/print.js",
+        "public/js/overrides/frappe/email_doc.js",
+    ],
 }
 
 # include js in doctype views
 doctype_js = {
-	"Item" : "public/js/item.js",
-	"Sales Order" : "public/js/sales_order.js",
-	"Sales Invoice" : "public/js/sales_invoice.js",
-	"Delivery Note" : "public/js/delivery_note.js",
+    "Item": "public/js/item.js",
+    "Sales Order": [
+        "public/js/sales_order.js",
+        "public/js/overrides/frappe/email_doc.js",
+    ],
+    "Sales Invoice": [
+        "public/js/sales_invoice.js",
+        "public/js/overrides/frappe/email_doc.js",
+    ],
+    "Delivery Note": [
+        "public/js/delivery_note.js",
+        "public/js/overrides/frappe/email_doc.js",
+    ],
 }
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
@@ -46,7 +58,7 @@ doctype_js = {
 
 # website user home page (by Role)
 # role_home_page = {
-#	"Role": "home_page"
+# "Role": "home_page"
 # }
 
 # Website user home page (by function)
@@ -87,21 +99,21 @@ doctype_js = {
 # Hook on document methods and events
 
 doc_events = {
-	"Item": {
-		"after_insert": "fairweather.events.item.after_insert",
-	},
-	"Contact": {
-		"validate": "fairweather.events.contact.validate",
-	},
-	"Sales Invoice": {
-		"validate": "fairweather.controllers.sales_invoice.validate",
-	},
-	"Sales Order": {
-		"validate": "fairweather.controllers.sales_order.validate",
-	},
-	"Delivery Note": {
-		"validate": "fairweather.controllers.delivery_note.validate",
-	},
+    "Item": {
+        "after_insert": "fairweather.events.item.after_insert",
+    },
+    "Contact": {
+        "validate": "fairweather.events.contact.validate",
+    },
+    "Sales Invoice": {
+        "validate": "fairweather.controllers.sales_invoice.validate",
+    },
+    "Sales Order": {
+        "validate": "fairweather.controllers.sales_order.validate",
+    },
+    "Delivery Note": {
+        "validate": "fairweather.controllers.delivery_note.validate",
+    },
 }
 
 # Scheduled Tasks

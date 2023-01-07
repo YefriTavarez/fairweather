@@ -23,9 +23,12 @@ def add_taxes_if_needed(doc):
     # 	"local_rate": doc.local_rate,
     # }
 
-    doc.taxes = list()
-    doc.append("taxes", get_tax_detail(doc, results, for_state=True))
-    doc.append("taxes", get_tax_detail(doc, results, for_state=False))
+    doc.taxes = list()  # empty table
+
+    fieldname = "taxes"
+    for for_state in (True, False):
+        tax_detail = get_tax_detail(doc, results, for_state)
+        doc.append(fieldname, tax_detail)
 
     doc.calculate_taxes_and_totals()
 
@@ -69,7 +72,7 @@ def get_tax_rates(tax_rate):
             "local_account": get_account(doc.state).local_account,
             "state_rate": doc.state_rate,
             "state_description": f"State: {doc.state}",
-            "location_description": f"Location: {doc.tax_region_name}\nZipCode: {doc.zip_code}",
+            "location_description": f"County: {doc.county}\n",
             "local_rate": doc.estimated_county_rate or doc.estimated_city_rate or doc.estimated_special_rate,
         }
 
