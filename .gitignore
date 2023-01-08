@@ -3,4 +3,5 @@
 *.egg-info
 *.swp
 tags
-fairweather/docs/current
+node_modules
+*.lock
