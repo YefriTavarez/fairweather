@@ -1,8 +1,6 @@
 (function () {
 	const { prototype } = frappe.ui.form.Form;
 
-	console.log("hey from form override");
-
 	prototype.execute_action = function (action) {
 		if (typeof action === "string") {
 			// called by label - maybe via custom script
