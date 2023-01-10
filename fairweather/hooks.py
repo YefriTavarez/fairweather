@@ -26,7 +26,6 @@ app_include_js = "/assets/js/fairweather.min.js"
 page_js = {
     "print": [
         "public/js/pages/print.js",
-        "public/js/overrides/frappe/email_doc.js",
     ],
 }
 
@@ -35,15 +34,12 @@ doctype_js = {
     "Item": "public/js/item.js",
     "Sales Order": [
         "public/js/sales_order.js",
-        "public/js/overrides/frappe/email_doc.js",
     ],
     "Sales Invoice": [
         "public/js/sales_invoice.js",
-        "public/js/overrides/frappe/email_doc.js",
     ],
     "Delivery Note": [
         "public/js/delivery_note.js",
-        "public/js/overrides/frappe/email_doc.js",
     ],
 }
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
