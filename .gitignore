@@ -6,3 +6,4 @@ __pycache__
 tags
 node_modules
 *.lock
+*.log
