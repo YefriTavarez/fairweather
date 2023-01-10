@@ -1,5 +1,5 @@
 frappe.ui.form.on("Sales Invoice", {
-	refresh: frm => {
+	refresh(frm) {
 		jQuery.map([
 			"customer_type",
 			"add_fetches",
@@ -7,10 +7,10 @@ frappe.ui.form.on("Sales Invoice", {
 			"add_custom_buttons",
 		], event => frm.trigger(event));
 	},
-	onload_post_render: frm => {
+	onload_post_render(frm) {
 		frm.trigger("toggle_enabled_on_submitted_fields");
 	},
-	validate: frm => {
+	validate(frm) {
 		const { doc } = frm,
 			{ db } = frappe,
 			{ get_value } = db;
@@ -29,11 +29,14 @@ frappe.ui.form.on("Sales Invoice", {
 				});
 		}
 	},
-	add_fetches: frm => {
+	on_submit(frm) {
+		frm.email_doc();
+	},
+	add_fetches(frm) {
 		frm.add_fetch("customer", "discount_terms_template",
 			"discount_terms_template");
 	},
-	set_queries: frm => {
+	set_queries(frm) {
 		const fieldname = "avalara_tax_rate";
 		const query = _ => {
 			const { doc } = frm;
@@ -46,7 +49,7 @@ frappe.ui.form.on("Sales Invoice", {
 
 		frm.set_query(fieldname, query);
 	},
-	toggle_enabled_on_submitted_fields: frm => {
+	toggle_enabled_on_submitted_fields(frm) {
 		let enable = [
 			"Overdue",
 			"Draft",
@@ -60,38 +63,19 @@ frappe.ui.form.on("Sales Invoice", {
 			"tracking_number"
 		], enable);
 	},
-	add_custom_buttons: frm => {
-		if (frm.doc.docstatus === 1 && frm.doc.contact_person) {
-			frm.add_custom_button(__("Email"), event => frm.trigger("send_email"));
+	add_custom_buttons(frm) {
+		const { doc } = frm;
+
+		if (doc.docstatus === 1 && doc.customer) {
+			const label = __("Email");
+			const fancy_label = __("Email <i>{0}</i>", [doc.customer_name || doc.customer]);
+			const action = _ => frm.email_doc();
+
+			const email_btn = frm.add_custom_button(label, action);
+			email_btn.html(fancy_label);
 		}
 	},
-	send_email: frm => {
-		const { sales_invoice_message } = frappe.boot.notification_settings;
-
-		frappe.db
-			.get_value("Contact", frm.doc.contact_person, "email_id")
-			.then(({ message }) => {
-				if (message) {
-					return message.email_id;
-				}
-			})
-			.then(email => {
-				const real_name = frm.doc.real_name
-					|| frm.doc.contact_display
-					|| frm.doc.contact_name;
-
-				new frappe.views.CommunicationComposer({
-					doc: frm.doc,
-					frm: frm,
-					subject: "Seaview " + __(frm.meta.name) + ": " + frm.docname,
-					recipients: email || "",
-					attach_document_print: true,
-					message: sales_invoice_message,
-					real_name: real_name
-				});
-			});
-	},
-	avalara_tax_rate: frm => {
+	avalara_tax_rate(frm) {
 		const { doc } = frm;
 
 		if (!doc.avalara_tax_rate) {

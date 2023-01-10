@@ -1,11 +1,17 @@
 frappe.ui.form.on("Sales Order", {
-	"onload": function (frm) {
+	onload(frm) {
 		frm.add_fetch("customer", "customer_type", "customer_type");
 	},
-	"refresh": function (frm) {
-		frm.trigger("set_queries");
+	refresh(frm) {
+		frappe.run_serially([
+			_ => frm.trigger("set_queries"),
+			_ => frm.trigger("add_custom_buttons"),
+		]);
 	},
-	set_queries: frm => {
+	on_submit(frm) {
+		frm.email_doc();
+	},
+	set_queries(frm) {
 		const fieldname = "avalara_tax_rate";
 		const query = _ => {
 			const { doc } = frm;
@@ -18,7 +24,19 @@ frappe.ui.form.on("Sales Order", {
 
 		frm.set_query(fieldname, query);
 	},
-	avalara_tax_rate: frm => {
+	add_custom_buttons(frm) {
+		const { doc } = frm;
+
+		if (doc.docstatus === 1 && doc.customer) {
+			const label = __("Email");
+			const fancy_label = __("Email <i>{0}</i>", [doc.customer_name || doc.customer]);
+			const action = _ => frm.email_doc();
+
+			const email_btn = frm.add_custom_button(label, action);
+			email_btn.html(fancy_label);
+		}
+	},
+	avalara_tax_rate(frm) {
 		const { doc } = frm;
 
 		if (!doc.avalara_tax_rate) {
