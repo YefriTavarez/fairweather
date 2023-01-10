@@ -31,15 +31,17 @@ page_js = {
 
 # include js in doctype views
 doctype_js = {
-    "Item": "public/js/item.js",
+    "Item": [
+        "public/js/doctype/item.js",
+    ],
     "Sales Order": [
-        "public/js/sales_order.js",
+        "public/js/doctype/sales_order.js",
     ],
     "Sales Invoice": [
-        "public/js/sales_invoice.js",
+        "public/js/doctype/sales_invoice.js",
     ],
     "Delivery Note": [
-        "public/js/delivery_note.js",
+        "public/js/doctype/delivery_note.js",
     ],
 }
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
