@@ -1,3 +1,7 @@
+// Copyright (c) 2023, Yefri Tavarez and contributors
+// For license information, please see license.txt
+// es-lint: disable
+
 frappe.ui.form.on("Sales Order", {
 	onload(frm) {
 		frm.add_fetch("customer", "customer_type", "customer_type");

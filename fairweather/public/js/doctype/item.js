@@ -1,3 +1,7 @@
+// Copyright (c) 2023, Yefri Tavarez and contributors
+// For license information, please see license.txt
+// es-lint: disable
+
 frappe.ui.form.on("Item", {
 	onload_post_render(frm) {
 		if (frm.is_new()) {

@@ -1,3 +1,7 @@
+// Copyright (c) 2023, Yefri Tavarez and contributors
+// For license information, please see license.txt
+// es-lint: disable
+
 (function () {
 	const { prototype } = frappe.ui.form.Form;
 
