@@ -1,5 +1,0 @@
-{
-	"js/fairweather.js": [
-		"public/js/overrides/frappe/form.js"
-	]
-}

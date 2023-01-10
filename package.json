@@ -1,0 +1,19 @@
+{
+	"dependencies": {
+		"@vue/babel-preset-app": "^5.0.8",
+		"express": "^4.18.2",
+		"vue": "^3.2.45"
+	},
+	"scripts": {
+		"build": "babel ./fairweather/public/js/globals --out-file ../../sites/assets/js/fairweather.min.js --minified",
+		"watch": "babel ./fairweather/public/js/globals --out-file ../../sites/assets/js/fairweather.min.js --minified --watch --verbose",
+		"live-reload": "babel ./fairweather/public/js/globals --out-file ../../sites/assets/js/fairweather.min.js --minified --watch --verbose"
+	},
+	"devDependencies": {
+		"@babel/cli": "^7.20.7",
+		"@babel/core": "^7.20.12"
+	},
+	"presets": [
+		"@vue/babel-preset-app"
+	]
+}
