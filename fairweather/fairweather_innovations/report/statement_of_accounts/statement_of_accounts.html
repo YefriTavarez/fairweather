@@ -1,0 +1,120 @@
+<style>
+	table {
+		page-break-inside: auto;
+	}
+</style>
+<!-- class="container-fluid" -->
+
+<table style="width: 100%" class="print-heading">
+	<tbody>
+		<tr class="row">
+			<td colspan="6">
+				<img
+					src="https://bo.fairweatherinnovations.com/files/sQ5MOTM.png"
+					alt="Logo"
+					class="img-responsive"
+					style="max-height: 40px;"
+				/>
+				<p class="text-muted text-left">2225 N. Molter Rd., Suite 105</p>
+				<p class="text-muted text-left">Liberty Lake, WA 99019</p>
+				<p class="text-muted text-left">800.655.7922</p>
+			</td>
+			<td colspan="6" class="text-right">
+				<h2 class="display-3">
+					Statement of Accounts<br>
+					<small class="text-muted">
+						Printed On <strong>
+							{{ frappe.format(frappe.datetime.now_datetime(), {"fieldtype": "Datetime"}) }}
+						</strong>
+					</small>
+				</h2>
+			</td>
+		</tr>
+	</tbody>
+</table>
+
+<h5 style="text-transform: uppercase" class="text-muted text-center">Filters</h5>
+<table style="width: 100%">
+	<tbody>
+		<tr class="row">
+			<td colspan="3" class="text-right">From Date </td>
+			<td colspan="3">
+				<strong>
+					{{ frappe.format(filters.from_date, {"fieldtype": "Date"}) }}
+				</strong>
+			</td>
+
+			<td colspan="3" class="text-right">To Date </td>
+			<td colspan="3">
+				<strong>
+					{{ frappe.format(filters.to_date, {"fieldtype": "Date"}) }}
+				</strong>
+			</td>
+		</tr>
+
+		<tr class="row">
+			<td colspan="3" class="text-right">Customer </td>
+			<td colspan="3">
+				<strong>
+					{{ filters.customer }}
+				</strong>
+			</td>
+			<td colspan="3" class="text-right"></td>
+			<td colspan="3"></td>
+		</tr>
+	</tbody>
+</table> 
+
+<table style="width: 100%" border="0" class="table table-bordered mt-4">
+	<thead>
+		<tr class="row">
+			<th colspan="2">Date</th>
+			<th colspan="2">Invoice No.</th>
+			<th colspan="2" class="text-right">Amount</th>
+			<th colspan="2">Due Date</th>
+			<th colspan="2" class="text-right">Outstanding Balance</th>
+		</tr>
+	</thead>
+	{% let total_invoice = 0 %}
+	{% let total_due = 0 %}
+	<tbody>
+		{% for row in data %}
+		<tr class="row">
+			<td colspan="2">
+				{{ frappe.format(row.posting_date, {"fieldtype": "Date"}) }}
+			</td>
+			<td colspan="2">
+				{{ row.name }}
+			</td>
+			<td colspan="2">
+				{{ frappe.format(row.grand_total, {"fieldtype": "Currency"}) }}
+			</td>
+			<td colspan="2">
+				{{ frappe.format(row.due_date, {"fieldtype": "Date"}) }}
+			</td>
+			<td colspan="2">
+				{{ frappe.format(row.outstanding_amount, {"fieldtype": "Currency"}) }}
+			</td>
+		</tr>
+
+		{% total_invoice = total_invoice + row.grand_total %}
+		{% total_due = total_due + row.outstanding_amount %}
+		{% endfor %}
+		<tr class="row">
+			<td colspan="2">
+				<strong>Totals</strong>
+			</td>
+			<td colspan="2" class="text-right"></td>
+
+			<td colspan="2" class="text-right">
+				<strong>{{ frappe.format(total_invoice, {"fieldtype": "Currency"}) }}</strong>
+			</td>
+
+			<td colspan="2" class="text-right"></td>
+
+			<td colspan="2" class="text-right">
+				<strong>{{ frappe.format(total_due, {"fieldtype": "Currency"}) }}</strong>
+			</td>
+		</tr>
+	</tbody>
+</table>

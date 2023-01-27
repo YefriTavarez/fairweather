@@ -34,6 +34,10 @@ doctype_js = {
     "Item": [
         "public/js/doctype/item.js",
     ],
+    "Customer": [
+        "public/js/doctype/customer.js",
+        "fairweather/fairweather_innovations/report/statement_of_accounts/statement_of_accounts.html",
+    ],
     "Sales Order": [
         "public/js/doctype/sales_order.js",
     ],
@@ -103,6 +107,9 @@ doc_events = {
     "Contact": {
         "validate": "fairweather.events.contact.validate",
     },
+    "Customer": {
+        "onload": "fairweather.controllers.customer.onload",
+    },
     "Sales Invoice": {
         "validate": "fairweather.controllers.sales_invoice.validate",
     },
@@ -113,6 +120,22 @@ doc_events = {
         "validate": "fairweather.controllers.delivery_note.validate",
     },
 }
+
+
+default_mail_footer = """
+    <div style="text-align: left; font-size: 10px; color: #999;">
+        <p>
+            <a href="https://www.seaviewglobal.com/" target="_blank">
+                SEAVIEW GLOBAL
+            </a>
+        </p>
+        <p>
+            <a href="https://www.seaviewglobal.com/pages/privacy-policy" target="_blank">
+                Privacy Policy
+            </a>
+        </p>
+    </div>
+"""
 
 # Scheduled Tasks
 # ---------------

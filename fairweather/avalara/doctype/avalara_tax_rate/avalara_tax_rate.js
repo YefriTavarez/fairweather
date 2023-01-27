@@ -3,8 +3,8 @@
 
 frappe.ui.form.on("Avalara Tax Rate", {
 	refresh(frm) {
-		if (!frm.is_new()) {
-			frm.disable_form();
-		}
+		// if (!frm.is_new()) {
+		// 	frm.disable_form();
+		// }
 	}
 });

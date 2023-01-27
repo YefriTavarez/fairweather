@@ -13,7 +13,8 @@ frappe.ui.form.on("Delivery Note", {
 		]);
 	},
 	on_submit(frm) {
-		frm.email_doc();
+		// don't auto-popup email dialog on Delivery Notes
+		// frm.email_doc(); 
 	},
 	set_queries(frm) {
 		const fieldname = "avalara_tax_rate";

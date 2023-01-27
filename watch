@@ -1,2 +1,5 @@
 #!/usr/bin/bash
+
+cd ./apps/fairweather
+
 yarn run watch

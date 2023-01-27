@@ -1,0 +1,153 @@
+{
+ "actions": [],
+ "allow_copy": 1,
+ "creation": "2023-01-26 16:44:25.248686",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "customer",
+  "customer_balance",
+  "section_break_3",
+  "credit_note",
+  "unallocated_amount",
+  "column_break_6",
+  "sales_invoice",
+  "invoice_amount",
+  "invoice_outstanding_amount",
+  "section_break_10",
+  "amount_to_apply",
+  "section_break_12",
+  "apply_credit",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Customer",
+   "options": "Customer",
+   "reqd": 1
+  },
+  {
+   "default": "0.000",
+   "fieldname": "customer_balance",
+   "fieldtype": "Currency",
+   "label": "Customer Balance",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_3",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "credit_note",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Credit Note",
+   "options": "Sales Invoice",
+   "reqd": 1
+  },
+  {
+   "default": "0.000",
+   "fieldname": "unallocated_amount",
+   "fieldtype": "Currency",
+   "label": "Unallocated Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_6",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sales_invoice",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Sales Invoice",
+   "options": "Sales Invoice",
+   "reqd": 1
+  },
+  {
+   "default": "0.000",
+   "fieldname": "invoice_amount",
+   "fieldtype": "Currency",
+   "label": "Invoice Amount",
+   "read_only": 1
+  },
+  {
+   "default": "0.000",
+   "fieldname": "invoice_outstanding_amount",
+   "fieldtype": "Currency",
+   "label": "Invoice Outstanding Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_10",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "amount_to_apply",
+   "fieldtype": "Currency",
+   "label": "Amount to Apply"
+  },
+  {
+   "fieldname": "section_break_12",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "apply_credit",
+   "fieldtype": "Button",
+   "label": "Apply Credit"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Credit Mapping Tool",
+   "print_hide": 1,
+   "read_only": 1
+  }
+ ],
+ "hide_toolbar": 1,
+ "in_create": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2023-01-26 16:45:27.513076",
+ "modified_by": "Administrator",
+ "module": "Fairweather Innovations",
+ "name": "Credit Mapping Tool",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "select": 1,
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Sales Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

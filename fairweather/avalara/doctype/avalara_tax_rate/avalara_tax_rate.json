@@ -145,7 +145,7 @@
    "link_fieldname": "avalara_tax_rate"
   }
  ],
- "modified": "2023-01-05 03:16:45.532327",
+ "modified": "2023-01-24 09:41:31.593746",
  "modified_by": "Administrator",
  "module": "Avalara",
  "name": "Avalara Tax Rate",
@@ -170,5 +170,8 @@
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],
- "title_field": "title"
+ "title_field": "title",
+ "track_changes": 1,
+ "track_seen": 1,
+ "track_views": 1
 }

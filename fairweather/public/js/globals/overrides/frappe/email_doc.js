@@ -43,9 +43,12 @@
 		}
 
 		const doctypes_with_contact = [
+			"Sales Invoice",
+			"Sales Invoice",
+		];
+
+		const doctypes_for_shipping = [
 			"Sales Order",
-			"Sales Invoice",
-			"Sales Invoice",
 		];
 
 		if (doctypes_with_contact.includes(doc.doctype)) {
@@ -71,8 +74,16 @@
 						real_name: real_name
 					});
 				});
+		} else if (doctypes_for_shipping.includes(doc.doctype)) {
+			return new frappe.views.CommunicationComposer({
+				doc: this.doc,
+				frm: this,
+				subject: `Seaview ${__(this.meta.name)}: ${this.docname}`,
+				recipients: "shipping@seaviewglobal.com",
+				attach_document_print: true,
+				message: `Here is a sales order for ${doc.customer_name}`,
+			});
 		}
-
 		return new frappe.views.CommunicationComposer({
 			doc: this.doc,
 			frm: this,
