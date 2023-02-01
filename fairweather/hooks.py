@@ -11,12 +11,53 @@ app_color = "#146"
 app_email = "yefritavarez@gmail.com"
 app_license = "General Public License, v3"
 
+# Fixtures
+# ------------------
+fixtures = [
+    {
+        "doctype": "Workflow",
+        "filters": [
+            [
+                "name", "in", [
+                    "Credit Mapping Tool",
+                ]
+            ],
+        ],
+    },
+    {
+        "doctype": "Workflow State",
+        "filters": [
+            [
+                "name", "in", [
+                    "Draft",
+                    "Submitted",
+                    "Cancelled",
+                ],
+            ],
+        ],
+    },
+    {
+        "doctype": "Workflow Action",
+        "filters": [
+            [
+                "name", "in", [
+                    "Apply Credit and Submit",
+                    "Cancel and Retry",
+                ],
+            ],
+        ],
+    },
+]
+
 # Includes in <head>
 # ------------------
 
 # include js, css files in header of desk.html
 # app_include_css = "/assets/fairweather/css/fairweather.css"
-app_include_js = "/assets/js/fairweather.min.js"
+app_include_js = [
+    "/assets/js/fairweather.min.js",
+    # "credit_mapping_tool.bundle.js",
+]
 
 # include js, css files in header of web template
 # web_include_css = "/assets/fairweather/css/fairweather.css"

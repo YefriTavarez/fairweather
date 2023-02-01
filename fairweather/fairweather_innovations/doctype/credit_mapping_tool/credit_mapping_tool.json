@@ -1,6 +1,6 @@
 {
  "actions": [],
- "allow_copy": 1,
+ "autoname": "format:CR-MAP-{#####}",
  "creation": "2023-01-26 16:44:25.248686",
  "default_view": "List",
  "doctype": "DocType",
@@ -19,7 +19,6 @@
   "section_break_10",
   "amount_to_apply",
   "section_break_12",
-  "apply_credit",
   "amended_from"
  ],
  "fields": [
@@ -51,6 +50,7 @@
   },
   {
    "default": "0.000",
+   "fetch_from": "credit_note.outstanding_amount",
    "fieldname": "unallocated_amount",
    "fieldtype": "Currency",
    "label": "Unallocated Amount",
@@ -70,6 +70,7 @@
   },
   {
    "default": "0.000",
+   "fetch_from": "sales_invoice.grand_total",
    "fieldname": "invoice_amount",
    "fieldtype": "Currency",
    "label": "Invoice Amount",
@@ -77,6 +78,7 @@
   },
   {
    "default": "0.000",
+   "fetch_from": "sales_invoice.outstanding_amount",
    "fieldname": "invoice_outstanding_amount",
    "fieldtype": "Currency",
    "label": "Invoice Outstanding Amount",
@@ -89,16 +91,12 @@
   {
    "fieldname": "amount_to_apply",
    "fieldtype": "Currency",
-   "label": "Amount to Apply"
+   "label": "Amount to Apply",
+   "reqd": 1
   },
   {
    "fieldname": "section_break_12",
    "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "apply_credit",
-   "fieldtype": "Button",
-   "label": "Apply Credit"
   },
   {
    "fieldname": "amended_from",
@@ -110,14 +108,13 @@
    "read_only": 1
   }
  ],
- "hide_toolbar": 1,
- "in_create": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-01-26 16:45:27.513076",
+ "modified": "2023-02-01 00:43:55.281799",
  "modified_by": "Administrator",
  "module": "Fairweather Innovations",
  "name": "Credit Mapping Tool",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {
@@ -147,7 +144,9 @@
    "write": 1
   }
  ],
+ "search_fields": "customer,credit_note,sales_invoice",
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "title_field": "customer"
 }

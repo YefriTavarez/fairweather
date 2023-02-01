@@ -41,7 +41,7 @@ frappe.ui.form.on('Credit Note Mapping Tool', {
 	"set_customer_query": (frm) => {
 		frm.set_query("customer", function () {
 			return {
-				"query": "fairweather.queries.customer_with_credit_query"
+				"query": "fairweather.queries.credit_mapping_tool.customer_query"
 			};
 		});
 	},

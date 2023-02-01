@@ -1,25 +1,3 @@
-# -*- coding: utf-8 -*-
-from setuptools import setup, find_packages
-import re, ast
+from setuptools import setup
 
-with open('requirements.txt') as f:
-	install_requires = f.read().strip().split('\n')
-
-# get version from __version__ variable in fairweather/__init__.py
-_version_re = re.compile(r'__version__\s+=\s+(.*)')
-
-with open('fairweather/__init__.py', 'rb') as f:
-	version = str(ast.literal_eval(_version_re.search(
-		f.read().decode('utf-8')).group(1)))
-
-setup(
-	name='fairweather',
-	version=version,
-	description='Fairweather Innovations custom app and ERPNext customizations',
-	author='Yefri Tavarez',
-	author_email='yefritavarez@gmail.com',
-	packages=find_packages(),
-	zip_safe=False,
-	include_package_data=True,
-	install_requires=install_requires
-)
+setup()
