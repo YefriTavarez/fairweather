@@ -1,5 +1,5 @@
 {
-	"fair.test.js": [
-		"public/js/fairweather.js"
+	"js/credit.min.js": [
+		"public/js/credit_mapping_tool.bundle.js"
 	]
 }

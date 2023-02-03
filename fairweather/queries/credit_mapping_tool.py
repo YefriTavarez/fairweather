@@ -3,10 +3,8 @@
 # For license information, please see license.txt
 
 import frappe
-
 from frappe import db
-
-from frappe.desk.reportview import get_match_cond, get_filters_cond
+from frappe.desk.reportview import get_filters_cond, get_match_cond
 
 
 @frappe.whitelist()
@@ -32,7 +30,7 @@ def customer_query(doctype, txt, searchfield, start, page_len, filters):
                 On invoice.customer = customer.name
                     And invoice.is_return = 1
                     And invoice.docstatus = 1
-                    And invoice.outstanding_amount > 0
+                    And invoice.outstanding_amount = 0
             Where
                 customer.docstatus < 2
                 And customer.disabled = 0

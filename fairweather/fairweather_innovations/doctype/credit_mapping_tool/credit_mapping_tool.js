@@ -44,7 +44,7 @@
                 "customer": doc.customer,
                 "docstatus": 1,
                 "is_return": 1,
-                "outstanding_amount": [">", 0],
+                "outstanding_amount": ["=", 0],
             };
 
             return { filters };
@@ -81,7 +81,7 @@
         ];
 
         for (const field of data_fields) {
-            frm.set_value(field, "");
+            frm[field] = "";
         }
 
         const number_fields = [
@@ -92,8 +92,10 @@
         ];
 
         for (const field of number_fields) {
-            frm.set_value(field, .0);
+            frm[field] = .0;
         }
+
+        frm.refresh_fields();
     }
 
     function auto_set_amount_to_apply(frm) {
@@ -107,16 +109,15 @@
 
     function fetch_customer_balance(frm) {
         const { doc } = frm;
-        const { customer } = doc;
 
-        if (!customer) {
+        if (!doc.customer) {
             frappe.throw("Please select a customer first");
         }
 
         const method = "erpnext.accounts.utils.get_balance_on";
         const args = {
             "party_type": "Customer",
-            "party": customer,
+            "party": doc.customer,
         };
 
         const callback = function(response) {
@@ -128,17 +129,47 @@
         frappe.call({ method, args, callback });
     }
 
+    function fetch_unallocated_amount(frm) {
+        const { doc } = frm;
+
+        if (!doc.credit_note) {
+            return "Please select a credit note first";
+        }
+
+        frappe.run_serially([
+            _ => frappe.db.get_value("Sales Invoice", doc.credit_note, "grand_total"),
+            ({ message }) => {
+                const {
+                    grand_total: unallocated_amount, 
+                } = message;
+
+                frm.set_value("unallocated_amount", - flt(unallocated_amount, 2));
+            },
+        ]);
+    }
+
     // FIELDS EVENTS
     function customer(frm) {
         const { doc } = frm;
-        const { customer } = doc;
 
-        if (!customer) {
+        if (!doc.customer) {
             return;
         }
 
         frappe.run_serially([
             _ => fetch_customer_balance(frm),
+        ]);
+    }
+
+    function credit_note(frm) {
+        const { doc } = frm;
+
+        if (!doc.credit_note) {
+            return;
+        }
+
+        frappe.run_serially([
+            _ => fetch_unallocated_amount(frm),
         ]);
     }
 
@@ -175,6 +206,7 @@
     frappe.ui.form.on("Credit Mapping Tool", {
         refresh,
         customer,
+        credit_note,
         unallocated_amount,
         invoice_outstanding_amount,
     });
