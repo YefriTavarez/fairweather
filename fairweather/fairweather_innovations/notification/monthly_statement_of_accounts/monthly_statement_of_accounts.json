@@ -1,0 +1,32 @@
+{
+ "attach_print": 1,
+ "channel": "Email",
+ "condition": "",
+ "creation": "2023-08-22 18:26:44.345059",
+ "days_in_advance": 0,
+ "docstatus": 0,
+ "doctype": "Notification",
+ "document_type": "Statement of Accounts",
+ "enabled": 1,
+ "event": "New",
+ "idx": 0,
+ "is_standard": 1,
+ "message": "<p>\nDear {{ doc.customer_name }},\n</p>\n\n<p>\nWe hope this email finds you well. We wanted to ensure that you're kept informed about the financial activities related to your account. As part of our commitment to transparency and convenience, we are excited to introduce our new Monthly Statement service.\n</p>\n\n<h3>How It Works:</h3>\n\n<p>\nOur Monthly Statement service is automated and hassle-free. You don't need to take any action to receive your statement. Your personalized statement will be attached to this email in a PDF format. You can view, download, and save it for your records.\n</p>\n\n<h3>\nKeeping Your Information Accurate:\n</h3>\n\n<p>\nTo ensure that your statements are sent to the correct email address, please take a moment to verify the correct email address where this should be sent to. If there are any changes or updates, kindly inform us at <a href=\"mailto:orders@seaviewglobal.com\">orders@seaviewglobal.com</a> / <a href=\"tel:+18006557922\">800-655-7922</a>. We want to make sure your statements reach you without any issues.\n</p>\n\n<h3>\nNeed Assistance?\n</h3>\n\n<p>\nIf you have any questions about the information presented in your statement, need clarification on a specific transaction, or require assistance with your account, our dedicated support team is here to help. Feel free to reach out to us at <a href=\"mailto:orders@seaviewglobal.com\">orders@seaviewglobal.com</a> / <a href=\"tel:+18006557922\">800-655-7922</a>.\n</p>\n\n<p>\nWe value your trust in us and are committed to providing you with the best service possible.\n</p>\n\n<p>\nWarm regards,\n</p>\n\n<p>\nThe Seaview Global Team\n</p>\n",
+ "modified": "2023-08-23 20:19:11.075085",
+ "modified_by": "Administrator",
+ "module": "Fairweather Innovations",
+ "name": "Monthly Statement of Accounts",
+ "owner": "Administrator",
+ "print_format": "Statement of Accounts",
+ "recipients": [
+  {
+   "receiver_by_document_field": "contact_email",
+   "receiver_by_role": "Accounts Receivable Manager"
+  }
+ ],
+ "send_system_notification": 0,
+ "send_to_all_assignees": 0,
+ "sender": "SEAVIEW Notifications",
+ "sender_email": "orders@seaviewglobal.com",
+ "subject": "Statement of Account for {{ doc.customer_name }} | {{ frappe.format(doc.as_of_date, {\"fieldtype\": \"Date\"}) }}"
+}

@@ -24,8 +24,6 @@
             const query = "fairweather.queries.credit_mapping_tool.customer_query";
             const filters = {};
 
-            clear_customer_dependent_fields(frm);
-
             return { query, filters };
         };
 
@@ -36,18 +34,20 @@
         const fieldname = "credit_note";
         const get_query = function() {
             const { doc } = frm;
+
             if (!doc.customer) {
                 frappe.throw("Please select a customer first");
             }
 
+            const query = "fairweather.queries.credit_mapping_tool.credit_note_for_mapping"
             const filters = {
                 "customer": doc.customer,
                 "docstatus": 1,
                 "is_return": 1,
-                "outstanding_amount": ["=", 0],
+                // "outstanding_amount": ["=", 0],
             };
 
-            return { filters };
+            return { query, filters };
         };
 
         frm.set_query(fieldname, get_query);
@@ -82,6 +82,7 @@
 
         for (const field of data_fields) {
             frm[field] = "";
+            frm.refresh_field(field);
         }
 
         const number_fields = [
@@ -93,9 +94,30 @@
 
         for (const field of number_fields) {
             frm[field] = .0;
+            frm.refresh_field(field);
+        }
+    }
+
+    function currency(num) {
+        num = num.toString().replace(/\$|\,/g, '');
+        if (isNaN(num)) {
+            num = "0";
+        }
+    
+        const sign = (num == (num = Math.abs(num)));
+        num = Math.floor(num * 100 + 0.50000000001);
+        let cents = num % 100;
+        num = Math.floor(num / 100).toString();
+    
+        if (cents < 10) {
+            cents = "0" + cents;
         }
 
-        frm.refresh_fields();
+        for (let index = 0; index < Math.floor((num.length - (1 + index)) / 3); index++) {
+            num = num.substring(0, num.length - (4 * index + 3)) + ',' + num.substring(num.length - (4 * index + 3));
+        }
+    
+        return (((sign) ? '' : '-') + '$' + num + '.' + cents);
     }
 
     function auto_set_amount_to_apply(frm) {
@@ -105,6 +127,13 @@
         const amount_to_apply = Math.min(invoice_outstanding_amount, unallocated_amount);
 
         frm.set_value("amount_to_apply", amount_to_apply);
+
+        if (amount_to_apply) {
+            frappe.show_alert({
+                message: __("Amount to Apply has been set to {0}", [currency(amount_to_apply)]),
+                indicator: "green",
+            });
+        }
     }
 
     function fetch_customer_balance(frm) {
@@ -133,17 +162,23 @@
         const { doc } = frm;
 
         if (!doc.credit_note) {
+            frm.set_value("unallocated_amount", 0.0);
             return "Please select a credit note first";
         }
 
         frappe.run_serially([
-            _ => frappe.db.get_value("Sales Invoice", doc.credit_note, "grand_total"),
+            _ => frappe.db.get_value("Sales Invoice", doc.credit_note, ["grand_total", "outstanding_amount"]),
             ({ message }) => {
                 const {
-                    grand_total: unallocated_amount, 
+                    grand_total,
+                    outstanding_amount, 
                 } = message;
 
-                frm.set_value("unallocated_amount", - flt(unallocated_amount, 2));
+                // credit note has a grand total in negative... lets make it positive
+                const new_grand_total = - grand_total;
+                const unallocated_amount = new_grand_total - outstanding_amount;
+
+                frm.set_value("unallocated_amount", flt(unallocated_amount, 2));
             },
         ]);
     }
@@ -153,6 +188,7 @@
         const { doc } = frm;
 
         if (!doc.customer) {
+            clear_customer_dependent_fields(frm);
             return;
         }
 
@@ -162,42 +198,18 @@
     }
 
     function credit_note(frm) {
-        const { doc } = frm;
-
-        if (!doc.credit_note) {
-            return;
-        }
-
         frappe.run_serially([
             _ => fetch_unallocated_amount(frm),
         ]);
     }
 
     function unallocated_amount(frm) {
-        const { doc } = frm;
-
-        if (
-            !doc.unallocated_amount
-            || !doc.invoice_outstanding_amount
-        ) {
-            return;
-        }
-
         frappe.run_serially([
             _ => auto_set_amount_to_apply(frm),
         ]);
     }
 
     function invoice_outstanding_amount(frm) {
-        const { doc } = frm;
-
-        if (
-            !doc.unallocated_amount
-            || !doc.invoice_outstanding_amount
-        ) {
-            return;
-        }
-
         frappe.run_serially([
             _ => auto_set_amount_to_apply(frm),
         ]);

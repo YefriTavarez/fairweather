@@ -30,7 +30,7 @@ def customer_query(doctype, txt, searchfield, start, page_len, filters):
                 On invoice.customer = customer.name
                     And invoice.is_return = 1
                     And invoice.docstatus = 1
-                    And invoice.outstanding_amount = 0
+                    And - invoice.grand_total - invoice.outstanding_amount > 0
             Where
                 customer.docstatus < 2
                 And customer.disabled = 0
@@ -44,6 +44,41 @@ def customer_query(doctype, txt, searchfield, start, page_len, filters):
                 If(Locate(%(_txt)s, customer.customer_name), Locate(%(_txt)s, customer.customer_name), 99999),
                 If(Locate(%(_txt)s, customer.customer_group), Locate(%(_txt)s, customer.customer_group), 99999),
                 customer.name, customer.customer_name
+            Limit %(start)s, %(page_len)s
+        """, values
+    )
+
+
+@frappe.whitelist()
+def credit_note_for_mapping(doctype, txt, searchfield, start, page_len, filters):
+    values = {
+        "txt": "%%%s%%" % txt,
+        "_txt": txt.replace("%", ""),
+        "start": start,
+        "page_len": page_len,
+        "customer": filters.get("customer") or ""
+    }
+
+    return db.sql(
+        f"""
+            Select
+                Distinct invoice.name,
+                invoice.posting_date,
+                invoice.due_date,
+                invoice.customer,
+                (
+                    - invoice.grand_total - invoice.outstanding_amount
+                ) As amount
+            From
+                `tabSales Invoice` As invoice
+            Where
+                invoice.customer = %(customer)s
+                And invoice.is_return = 1
+                And invoice.docstatus = 1
+                And - invoice.grand_total - invoice.outstanding_amount > 0
+                {"And invoice.name Like %(txt)s" if txt else ""}
+            Order By
+                invoice.name
             Limit %(start)s, %(page_len)s
         """, values
     )

@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../../apps/fairweather/fairweather/public/js/credit_mapping_tool.bundle.js"],
+  "sourcesContent": ["frappe.provide(\"fairweather\");\nfunction setup(frm) {\n\tconsole.log(\"Hello from bundle.js\");\n\tthis.frm = frm;\n}\n\nfunction customer(frm) {\n\tconst { doc } = frm;\n\tconsole.log(`customer -> ${doc.customer}`);\n}\n\nconsole.log(\"Hello from bundle.js\");\n\nfairweather.creditController = {\n\tsetup,\n\tcustomer,\n}"],
+  "mappings": "MAAA,OAAO,QAAQ,aAAa,EAC5B,WAAe,EAAK,CACnB,QAAQ,IAAI,sBAAsB,EAClC,KAAK,IAAM,CACZ,CAEA,WAAkB,EAAK,CACtB,GAAM,CAAE,OAAQ,EAChB,QAAQ,IAAI,eAAe,EAAI,UAAU,CAC1C,CAEA,QAAQ,IAAI,sBAAsB,EAElC,YAAY,iBAAmB,CAC9B,QACA,UACD",
+  "names": []
+}

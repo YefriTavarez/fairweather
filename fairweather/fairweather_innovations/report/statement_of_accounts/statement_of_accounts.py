@@ -76,7 +76,8 @@ class StatementOfAccountsReport(object):
 
         # always on conditions
         conditions.append("docstatus = 1")
-        conditions.append("outstanding_amount != 0")
+        conditions.append("is_return = 0")
+        conditions.append("outstanding_amount > 0")
 
         # company
         if self.filters.get("company"):

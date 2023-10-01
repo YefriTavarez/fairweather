@@ -15,13 +15,7 @@ class CreditMappingTool(ValidatorController):
         self.map_credit(cancel=False)
 
     def on_cancel(self):
-        title = "Not implemented yet"
-        message = """
-            <p>This feature is not implemented yet.</p>
-            <p>If you need this feature, please contact the developer.</p>
-            """
-        frappe.throw(message, title=title)
-        # self.map_credit(cancel=True)
+        self.map_credit(cancel=True)
 
     def map_credit(self, cancel=False):
         customer = self.get_customer()

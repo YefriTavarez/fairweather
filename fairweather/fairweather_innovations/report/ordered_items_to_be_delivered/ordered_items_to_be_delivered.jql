@@ -1,0 +1,73 @@
+Select
+    sales_order.name As sales_order,
+    sales_order.status As status,
+    sales_order.company As company,
+    sales_order.customer As customer,
+    sales_order.customer_name As customer_name,
+    sales_order.transaction_date As date,
+    sales_order.shipping_method As shipping_method,
+    item.item_code As item,
+    item.qty As ordered_qty,
+    item.delivered_qty As delivered_qty,
+    (item.qty - IfNull(item.delivered_qty, 0)) As qty_to_deliver,
+    item.base_rate As rate,
+    item.base_amount As amount,
+    ((item.qty - IfNull(item.delivered_qty, 0))*item.base_rate) As amount_to_deliver,
+    bin.actual_qty As available_qty,
+    bin.projected_qty As projected_qty,
+    item.delivery_date As item_delivery_date,
+    dateDiff(curDate(), item.delivery_date) As delay_days,
+    item.item_name As item_name,
+    item.description As description,
+    item.item_group As item_group,
+    item.warehouse As warehouse
+From
+    `tabSales Order` As sales_order
+Inner Join
+    `tabSales Order Item` As item
+    On item.parent = sales_order.name
+    And item.parenttype = "Sales Order"
+    And item.parentfield = "items"
+Left Join
+    `tabBin`As bin
+On bin.item_code = item.item_code
+     And bin.warehouse = item.warehouse
+Where
+    sales_order.docstatus = 1
+    And sales_order.status Not In ("Stopped", "Closed")
+    And IfNull(item.delivered_qty, 0) < IfNull(item.qty, 0)
+
+    {% if company %}
+        And sales_order.company = %(company)s
+    {% endif %}
+
+    {% if from_date %}
+        And sales_order.transaction_date >= %(from_date)s
+    {% endif %}
+
+    {% if to_date %}
+        And sales_order.transaction_date <= %(to_date)s
+    {% endif %}
+
+    {% if customer %}
+        And sales_order.customer = %(customer)s
+    {% endif %}
+
+    {% if item %}
+        And item.item_code = %(item)s
+    {% endif %}
+
+    {% if item_group %}
+        And item.item_group = %(item_group)s
+    {% endif %}
+
+    {% if warehouse %}
+        And item.warehouse = %(warehouse)s
+    {% endif %}
+
+    {% if shipping_method %}
+        And sales_order.shipping_method Like %(shipping_method)s
+    {% endif %}
+
+Order By 
+    sales_order.transaction_date Asc

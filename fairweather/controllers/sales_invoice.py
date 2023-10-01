@@ -2,17 +2,22 @@
 # Copyright (c) 2022, Yefri Tavarez and contributors
 # For license information, please see license.txt
 
-import frappe
-
 from functools import lru_cache
-from frappe.utils import flt, cstr, cint
 
-from fairweather.controllers.selling_common import add_taxes_if_needed
+import frappe
+from frappe.utils import cint, cstr, flt
+
+from fairweather.controllers.exceptions import InvalidContactEmailConfigurationError
+from fairweather.controllers.selling_common import (
+    add_taxes_if_needed,
+    get_primary_contact_email,
+)
 
 
 def validate(doc, method=None):
     fetch_discount_terms(doc)
     ensure_correct_value_of_avalara_state(doc)
+    ensure_correct_contact_email(doc)
     clear_state_and_tax_if_needed(doc)
     add_taxes_if_needed(doc)
 
@@ -71,3 +76,15 @@ def ensure_correct_value_of_avalara_state(doc):
 
     value = frappe.get_value(doctype, name, fieldname)
     doc.avalara_state = value
+
+
+def ensure_correct_contact_email(doc):
+    if not doc.contact_person:
+        doc.contact_email = None
+        return "No value for Contact Email: Skipping."
+
+    try:
+        doc.contact_email = get_primary_contact_email(for_contact=doc.contact_person, for_customer=doc.customer)
+    except InvalidContactEmailConfigurationError as exc:
+        doc.contact_email = None
+        return exc.error_message

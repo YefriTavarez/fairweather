@@ -1,0 +1,105 @@
+{
+ "actions": [],
+ "autoname": "hash",
+ "creation": "2023-08-22 15:52:14.315120",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "notice",
+  "details_section",
+  "customer",
+  "customer_name",
+  "contact_email",
+  "column_break_3",
+  "as_of_date",
+  "section_break_4",
+  "statement_of_accounts"
+ ],
+ "fields": [
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Customer",
+   "options": "Customer",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.customer!==doc.customer_name",
+   "fetch_from": "customer.customer_name",
+   "fieldname": "customer_name",
+   "fieldtype": "Data",
+   "label": "Customer Name",
+   "read_only": 1
+  },
+  {
+   "default": "Today",
+   "fieldname": "as_of_date",
+   "fieldtype": "Date",
+   "in_standard_filter": 1,
+   "label": "As of Date"
+  },
+  {
+   "fieldname": "section_break_4",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "statement_of_accounts",
+   "fieldtype": "Table",
+   "label": "Statement of Accounts Detail",
+   "options": "Statement of Accounts Detail",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "contact_email",
+   "fieldtype": "Data",
+   "label": "Contact Email",
+   "options": "Email",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.__islocal",
+   "fieldname": "notice",
+   "fieldtype": "HTML",
+   "options": "<p style=\"background: #fff5f0; color: #4a5464; border-radius: 4px; border: 1px solid #cb5a2a; padding: 1% 4%; text-align: center;\">\nHey! As soon as save this new Statement of Account the system is going to send an email specified in the Contact Email field.\n</p>"
+  },
+  {
+   "fieldname": "details_section",
+   "fieldtype": "Section Break",
+   "label": "Details"
+  }
+ ],
+ "hide_toolbar": 1,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2023-08-22 18:05:12.601032",
+ "modified_by": "Administrator",
+ "module": "Fairweather Innovations",
+ "name": "Statement of Accounts",
+ "naming_rule": "Random",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "customer"
+}

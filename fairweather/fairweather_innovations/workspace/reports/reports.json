@@ -47,9 +47,19 @@
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Ordered Items To Be Delivered",
+   "link_count": 0,
+   "link_to": "Ordered Items To Be Delivered",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
   }
  ],
- "modified": "2022-12-13 01:00:23.466308",
+ "modified": "2023-04-05 03:52:58.054618",
  "modified_by": "Administrator",
  "module": "Fairweather Innovations",
  "name": "Reports",
@@ -152,6 +162,12 @@
    "doc_view": "List",
    "label": "Local Tax Rates",
    "link_to": "Local Tax Rates",
+   "type": "Report"
+  },
+  {
+   "doc_view": "List",
+   "label": "Ordered Items To Be Delivered",
+   "link_to": "Ordered Items To Be Delivered",
    "type": "Report"
   }
  ],

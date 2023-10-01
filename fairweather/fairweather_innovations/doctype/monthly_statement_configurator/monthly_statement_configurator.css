@@ -1,0 +1,22 @@
+#page-Monthly\ Statement\ Configurator
+div[data-fieldname=customer_and_email] div.grid-field label.control-label {
+	display: none;
+}
+
+#page-Monthly\ Statement\ Configurator
+	button[data-fieldname=fetch_customers] {
+		background-color: var(--primary);
+		color: var(--white);
+		white-space: nowrap;
+		--icon-stroke: currentColor;
+		--icon-fill-bg: var(--primary);
+	}
+
+#page-Monthly\ Statement\ Configurator
+	button[data-fieldname=remove_customers_without_email] {
+		background-color: #bc1616e6;
+		color: var(--white);
+		white-space: nowrap;
+		--icon-stroke: currentColor;
+		--icon-fill-bg: var(--primary);
+	}

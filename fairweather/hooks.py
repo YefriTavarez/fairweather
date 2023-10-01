@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
+
 from . import __version__ as app_version
 
 app_name = "fairweather"
@@ -163,6 +164,14 @@ doc_events = {
 }
 
 
+# Overriding DocType Classes
+# ------------------------------
+
+override_doctype_class = {
+    "Notification": "fairweather.controllers.frappe.notification.Notification",
+}
+
+
 default_mail_footer = """
     <div style="text-align: left; font-size: 10px; color: #999;">
         <p>
@@ -181,23 +190,23 @@ default_mail_footer = """
 # Scheduled Tasks
 # ---------------
 
-# scheduler_events = {
-# 	"all": [
-# 		"fairweather.tasks.all"
-# 	],
-# 	"daily": [
-# 		"fairweather.tasks.daily"
-# 	],
-# 	"hourly": [
-# 		"fairweather.tasks.hourly"
-# 	],
-# 	"weekly": [
-# 		"fairweather.tasks.weekly"
-# 	]
-# 	"monthly": [
-# 		"fairweather.tasks.monthly"
-# 	]
-# }
+scheduler_events = {
+	"all": [
+		"fairweather.scheduler.all"
+	],
+	"daily": [
+		"fairweather.scheduler.daily"
+	],
+	"hourly": [
+		"fairweather.scheduler.hourly"
+	],
+	"weekly": [
+		"fairweather.scheduler.weekly"
+	],
+	"monthly": [
+		"fairweather.scheduler.monthly"
+	]
+}
 
 # Testing
 # -------
